@@ -1,0 +1,37 @@
+# Prédicat extensionnels :
+# Etape(idEtape, nomEtape, latitude, longitude, niveauConfort, idCategorieConfort)
+# Troncon(idTroncon, nomUsuel, distance, typeSol, deniveleMoyen, idPointDepart, idPointArrivee)
+
+
+# Pour lister toutes les étapes connectées par des trajets de randonnées possibles à partir d'une instance de la base de données :
+
+connected(X, Y) :- Troncon(_, _, _, _, _, X, Y).
+connected(X, Y) :- Troncon(_, _, _, _, _, Y, X).
+
+path(X, Y) :- connected(X, Y).
+path(X, Y) :- connected(X, Z), path(Z, Y).
+
+connected_etape(X, Y) :- path(X, Y).
+connected_etape(X, Y) :- path(X, Z), path(Z, Y), X != Y.
+
+reachable(X, Y) :- connected_etape(X, Y).
+reachable(X, Y) :- connected_etape(X, Z), reachable(Z, Y), X != Y.
+
+
+# Pour lister les parcours qui passent uniquement par des tronçons en terre :
+
+parcours_terre(X, Y) :- Troncon(_, _, _, 'terre', _, X, Y).
+
+# Pour lister toutes les étapes connectées par des trajets de randonnées ayant un nombre impair de tronçons :
+
+odd_length_path(X, Y) :- path(X, Y), count_path(X, Y, N), N % 2 == 1.
+
+count_path(X, Y, N) :- count_path_helper(X, Y, 0, N).
+
+count_path_helper(X, Y, Acc, N) :- Troncon(_, _, _, _, _, X, Y), N = Acc + 1.
+count_path_helper(X, Y, Acc, N) :- Troncon(_, _, _, _, _, X, Z), count_path_helper(Z, Y, Acc + 1, N).
+
+
+# Pour lister toutes les étapes connectées par des trajets correspondant à un circuit :
+
+circuit(X) :- path(X, X).
