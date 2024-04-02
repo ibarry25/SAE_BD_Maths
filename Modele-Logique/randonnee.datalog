@@ -5,33 +5,72 @@
 
 # Pour lister toutes les étapes connectées par des trajets de randonnées possibles à partir d'une instance de la base de données :
 
-connected(X, Y) :- Troncon(_, _, _, _, _, X, Y).
-connected(X, Y) :- Troncon(_, _, _, _, _, Y, X).
+troncon(t1, orleans, blois, terre).
+troncon(t2, blois, tours, terre).
+troncon(t3, blois, chartres, goudron).
+troncon(t5, chartres, paris, goudron).
+troncon(t6, paris, lille, sable).
+troncon(t7, lille, bruxelles, sable).
 
-path(X, Y) :- connected(X, Y).
-path(X, Y) :- connected(X, Z), path(Z, Y).
+chemin(X, Y) :- tronçon(_, X, Y, _).
+chemin(X, Z) :- tronçon(_, X, Y, _), chemin(Y, Z).
 
-connected_etape(X, Y) :- path(X, Y).
-connected_etape(X, Y) :- path(X, Z), path(Z, Y), X != Y.
-
-reachable(X, Y) :- connected_etape(X, Y).
-reachable(X, Y) :- connected_etape(X, Z), reachable(Z, Y), X != Y.
+chemin(orleans,Y)?
 
 
 # Pour lister les parcours qui passent uniquement par des tronçons en terre :
 
-parcours_terre(X, Y) :- Troncon(_, _, _, 'terre', _, X, Y).
+troncon(t1, orleans, blois, terre).
+troncon(t2, blois, tours, go).
+troncon(t3, blois, chartre, goudron).
+troncon(t4, tours, paris, terre).
+troncon(t5, tours, dunkerque, sable).
+troncon(t6, blois, marseille, terre).
+troncon(t7, tours, orleans, terre).
+
+chemin(X, Y) :- troncon(_, X, Y, terre).
+chemin(X, Z) :- troncon(_, X, Y, terre), chemin(X, Y), chemin(Y, Z).
+chemin(X, Y) :- troncon(_, X, Z, terre), chemin(Z, W), chemin(W, Y).
 
 # Pour lister toutes les étapes connectées par des trajets de randonnées ayant un nombre impair de tronçons :
 
-odd_length_path(X, Y) :- path(X, Y), count_path(X, Y, N), N % 2 == 1.
+troncon(t1, orleans, blois, terre).
+troncon(t2, blois, tours, terre).
+troncon(t3, blois, chartre, goudron).
+troncon(t4, tours, paris, terre).
+troncon(t5, tours, dunkerque, sable).
+troncon(t6, blois, marseille, terre).
+troncon(t7, paris, marseille, terre).
+troncon(t7, marseille, nancy, terre).
+troncon(t8, nancy, neuneu, terre).
+troncon(t9, neuneu, prout, terre).
 
-count_path(X, Y, N) :- count_path_helper(X, Y, 0, N).
 
-count_path_helper(X, Y, Acc, N) :- Troncon(_, _, _, _, _, X, Y), N = Acc + 1.
-count_path_helper(X, Y, Acc, N) :- Troncon(_, _, _, _, _, X, Z), count_path_helper(Z, Y, Acc + 1, N).
+
+
+chemin1(X, Y) :- troncon(_, X, Y, _).
+chemin1(X,Z) :- troncon(_, X, Y, _), chemin2(Y, Z).
+
+chemin2(X, Z) :- troncon(_, X, Y, _), chemin1(Y,Z).
+
+odd_chemin(X, Y) :- chemin1(X, Y).
 
 
 # Pour lister toutes les étapes connectées par des trajets correspondant à un circuit :
 
-circuit(X) :- path(X, X).
+troncon(t1, orleans, blois, terre).
+troncon(t2, blois, tours, terre).
+troncon(t3, blois, chartre, goudron).
+troncon(t4, tours, paris, terre).
+troncon(t5, tours, dunkerque, sable).
+troncon(t6, blois, marseille, terre).
+troncon(t7, paris, marseille, terre).
+troncon(t7, marseille, nancy, terre).
+troncon(t8, nancy, neuneu, terre).
+troncon(t9, neuneu, prout, terre).
+troncon(t20, paris, orleans, terre).
+
+chemin(X, Y) :- troncon(_, X, Y, _).
+chemin(X, Z) :- troncon(_, X, Y, _), chemin(Y, Z).
+
+circuit(X) :- chemin(X, Y), chemin(Y, X).
