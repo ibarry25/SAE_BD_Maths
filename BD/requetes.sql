@@ -1,4 +1,4 @@
--- Donner Donner les noms des étapes que nous pouvons atteindre directement en suivant les tronçons qui partent d’Orléans 
+-- Donner les noms des étapes que nous pouvons atteindre directement en suivant les tronçons qui partent d’Orléans 
 
 SELECT e.nomEtape
 FROM Troncons t
@@ -19,17 +19,16 @@ WHERE e1.nomEtape = 'Orléans';
 
 -- Veuillez fournir la liste des étapes accessibles depuis Orléans, avec un nombre quelconque d’étapes intermédiaires
 
-WITH RECURSIVE Chemin AS (
-  SELECT t.idPointArrivee AS idEtape, 1 AS niveau
-  FROM Troncons t
-  JOIN Etapes e ON t.idPointArrivee = e.idEtape
-  JOIN Etapes e_dep ON t.idPointDepart = e_dep.idEtape
-  WHERE e_dep.nomEtape = 'Orléans'
+WITH Chemin(idEtape,nomEtape,niveau) AS (
+  SELECT e.idEtape, e.nomEtape ,0
+  FROM Etapes e
+  WHERE e.nomEtape = 'Orléans'
   UNION ALL
-  SELECT t.idPointArrivee, c.niveau + 1
-  FROM Troncons t
+  SELECT e.idEtape, e.nomEtape ,c.niveau + 1
+  FROM Etapes e 
+  JOIN Troncons t ON e.idEtape = t.idPointArrivee
   JOIN Chemin c ON t.idPointDepart = c.idEtape
 )
-SELECT e.nomEtape
+SELECT distinct nomEtape, niveau
 FROM Chemin c
-JOIN Etapes e ON c.idEtape = e.idEtape;
+WHERE nomEtape != 'Orléans';
